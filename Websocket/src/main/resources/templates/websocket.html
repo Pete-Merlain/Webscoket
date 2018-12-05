@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>通信页面</title>
+<style type="text/css">
+textarea {
+	resize: none;
+	border: none;
+	text-indent: 10px;
+	padding-top: 10px;
+}
+
+body {
+	padding: 10%;
+	text-align: center;
+}
+
+button {
+	padding: 10px 16px;
+	border-radius: 20px;
+	margin-top: 30px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+}
+
+p {
+	line-height: 25px;
+}
+
+.user:hover {
+	cursor: pointer;
+	color: white;
+	background-color: skyblue;
+}
+
+div {
+	margin-bottom: 20px
+}
+#message{
+	display: flex;
+}
+#message>div{
+	flex-grow: 6;
+}
+.error{
+	color:red;
+	font-size: 20px;
+}
+.red{
+	color:red;
+}
+</style>
+</head>
+<body>
+	<div class='big'>
+		<div>
+			<label></label>
+		</div>
+		<div>
+			<p v-for="user in users" class="user" v-bind:id="user.id">{{user.name}}</p>
+		</div>
+		<div>发送给:<span class="send"></span></div>
+		<div id="message">
+			<div>
+				消息:
+				<div class="msg">
+				</div>
+			</div>
+			<div>
+				通知:
+				<div class="info">
+				</div>
+			</div>
+		</div>
+		<div>
+			<div>
+				<textarea rows="10" cols="100"></textarea>
+			</div>
+			<div class="error"></div>
+			<button>发送</button>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:src="@{js/jquery-1.8.3.js}"></script>
+<script type="text/javascript" th:src="@{js/vue.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+
+	var uid='';
+	var v=new Vue({
+		el:".big",
+		data:{
+			users:[]
+		}
+	});
+	
+	var host=window.location.host;
+	console.log(host);
+	var websocket=new WebSocket("ws://"+host+"/we/"+[[${session.user.id}]]);
+	websocket.onopen=function(){
+		$("label").text("连接已开启...");
+		console.log("...");
+	};
+	websocket.onerror=function(e){
+		console.log(e);
+	};
+	websocket.onmessage=function(e){
+		var msg=JSON.parse(e.data);
+		var temp=$("<p></p>");
+		temp.text(msg.message);
+		if(msg.state==200){
+			if(msg.type){
+				$(".msg").append(temp);
+			}else{
+				if(msg.state!=200){
+					temp.addClass("red");
+				}
+				$(".info").append(temp);
+			}
+		}else{
+			temp.addClass("red");
+			$(".info").append(temp);
+		}
+	}
+	
+	$("button").click(function(){
+		$(".error").text("");
+		sendMsg();
+	});
+	
+	function sendMsg(){
+		var val=$("textarea").val();
+		if(uid!=''&&val!=''){
+			$.ajax({
+				url:"websocket/sendMsg",
+				type:"post",
+				data:{
+					id:uid,
+					msg:val
+				},success:function(){
+					console.log("服务器已接受信息");
+					$("textarea").val("");
+				}
+			});			
+		}else if(uid==''){
+			$(".error").text("请选择发送对象");
+		}else{
+			$(".error").text("发送内容不能为空");
+		}
+	}
+	
+	$(".user").live("click",function(){
+		uid=$(this).attr("id");
+		$(".send").text($(this).text());
+	});
+	
+	$.ajax({
+		url:"ajax/users",
+		data : {
+			id:[[${session.user.id}]]
+		},
+		success:function(data){
+			v.users=data;
+		}
+	});
+</script>
+</html>

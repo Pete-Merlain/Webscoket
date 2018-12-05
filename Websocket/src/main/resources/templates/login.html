@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>页面通信 | 登陆</title>
+<link rel=stylesheet type=text/css th:href="@{css/style.css}">
+</head>
+<body>
+	<div id=regLogin class=wrap>
+		<div class=dialog>
+			<div class=box>
+				<h4>用户登录</h4>
+				<form id=user method=post name=user th:action=@{/login.do}>
+					<div class=infos>
+						<table class=field>
+							<tbody>
+								<tr>
+									<td colSpan=2></td>
+								</tr>
+								<tr>
+									<td class=field>用 户 名：</td>
+									<td>
+										<!-- <input type="text" class="text" name="name" /> --> <input
+										id=user_name class="text account" type=text name=name>
+									</td>
+								</tr>
+								<tr>
+									<td class=field>密 码：</td>
+									<td>
+										<!-- <input type="password" class="text" name="password" /> -->
+										<input id=user_password class="text pwd" type=password
+										name=password>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div class=buttons>
+							<input value=登陆 type=button class=loginbtn> <input
+								onclick='document.location="reg"' value=注册 type=button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id=footer class=wrap>
+		<dl>
+			<dt>房屋出售 © 2018 赵客缦胡缨 京ICP证1000001号</dt>
+			<dd>关于我们 · 联系方式 · 意见反馈 · 帮助中心</dd>
+		</dl>
+	</div>
+</body>
+<script type="text/javascript" th:src="@{js/jquery-1.8.3.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+	function login() {
+		var account = $(".account").val();
+		var pwd = $(".pwd").val();
+		console.log(account);
+		console.log(pwd);
+		$.ajax({
+			url : "ajax/login",
+			type : "post",
+			data : {
+				account : $(".account").val(),
+				pwd : $(".pwd").val()
+			},
+			success : function(data) {
+				console.log(data);
+				if (data) {
+					location.href = "websocket";
+				}
+			}
+		});
+	}
+	
+	$("input").keyup(function(e){
+		if(e.keyCode==13){
+			login();			
+		}
+	});
+
+	$(".loginbtn").click(function() {
+		login();
+	});
+</script>
+</html>

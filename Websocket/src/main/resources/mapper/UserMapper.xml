@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.accp.mapper.UserMapper">
+	<cache></cache>
+	<resultMap type="com.accp.domain.User" id="user">
+		<result property="id" column="uid" />
+		<result property="name" column="name" />
+		<result property="pwd" column="pwd" />
+		<result property="account" column="account" />
+	</resultMap>
+	<select id="queryById" resultMap="user">
+		select *
+		from user
+		where uid=#{id}
+	</select>
+	<select id="login" resultMap="user">
+		select *
+		from user
+		where account=#{account} and pwd=#{pwd}
+	</select>
+	<select id="users" resultMap="user">
+		select *
+		from user
+		where uid!=#{id}
+	</select>
+</mapper>
